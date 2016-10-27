@@ -31,5 +31,9 @@
   "Role": {
     "dataSource": "db",
     "public": false
+  },
+  "SensorReading": {
+    "dataSource": "db",
+    "public": true
   }
 }
