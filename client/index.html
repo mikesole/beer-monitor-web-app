@@ -17,33 +17,38 @@
     
     <script>
         
-        $.getJSON('https://www.brew.mikesole.co.uk/api/SensorReadings', null, function(data){
+        $.getJSON('https://www.brew.mikesole.co.uk/api/SensorReadings', function(data){
 
             //alert(JSON.stringify(data, null, 2));
-            
             var num_readings = data.length;
-            
-            var xs = new Array(num_readings);
-            var ys = new Array(num_readings);
-            
+
+            channels = {};
+                        
             // gather data in plotly time series format
             for (var i = 0; i < num_readings; i++) {   
                 
-                // translate iso time format to plotly time format
-                xs[i] = data[i]["timestamp"].replace("T", " ").replace("Z", "");
+                reading = data[i]
+
+                if(reading["sensor-id"] in channels == false){
+                   channels[reading["sensor-id"]] = {"xs" : new Array(num_readings), "ys" : new Array(num_readings), "counter" : 0}
+                }
+
+                channel = channels[reading["sensor-id"]]
                 
-                // gather timestamp data
-                ys[i] = data[i]["value"];
-                
+                channel["xs"][channel["counter"]] = reading["timestamp"].replace("T", " ").replace("Z", "");
+                channel["ys"][channel["counter"]] = reading["value"]
+
+		channel["counter"]++;
+
             }
                         
-            var temp = {
-                x: xs,
-                y: ys,
-                type: 'scatter'
-            };
+            var plot_data = [];
 
-            var plot_data = [temp];
+            for (var channel in channels) {
+               if (channels.hasOwnProperty(channel)) {
+                   plot_data.push({x : channels[channel]["xs"], y : channels[channel]["ys"], type: 'scatter'})
+               }
+            }
 
             Plotly.newPlot('plotDiv', plot_data);
 
